@@ -1,0 +1,4 @@
+rootProject.name = 'spotify-addon'
+
+//include ':desktopmodules-core'
+//project(':desktopmodules-core').projectDir = new File("../desktopmodules-core")
