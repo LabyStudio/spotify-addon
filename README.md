@@ -1,5 +1,5 @@
 # Spotify Addon
-This addon required the core application [DesktopModules](https://github.com/LabyStudio/desktopmodules-core)
+This addon required the core application [DesktopModules](https://github.com/LabyStudio/desktopmodules)
 
 ## Installation
 Put the built jar file into the following directory: ``C:/Users/<name>/AppData/Roaming/DesktopModules/addons/``<br>
