@@ -56,7 +56,8 @@ public class SpotifyModule extends Module<SpotifyAddon> {
         boolean extendedModule = isMouseOver();
 
         // Draw spotify image
-        context.drawImage(this.textureSpotify, this.rightBound ? width - height : 0, 0, height, height);
+        BufferedImage trackCover = track == null || track.getCover() == null ? this.textureSpotify : track.getCover();
+        context.drawImage(trackCover, this.rightBound ? width - height : 0, 0, height, height);
 
         // Draw background
         if (extendedModule) {

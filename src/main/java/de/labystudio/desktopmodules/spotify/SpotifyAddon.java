@@ -23,7 +23,7 @@ public class SpotifyAddon extends Addon {
 
     @Override
     public void onDisable() {
-        this.spotifyAPI.getSpotifyConnector().disconnect();
+        this.spotifyAPI.forceDisconnect();
     }
 
     @Override
