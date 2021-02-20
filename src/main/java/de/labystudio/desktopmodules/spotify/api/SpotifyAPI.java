@@ -5,6 +5,8 @@ import de.labystudio.desktopmodules.spotify.api.protocol.PacketHandler;
 import de.labystudio.desktopmodules.spotify.api.protocol.packet.DataPacket;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Spotify API
@@ -14,6 +16,7 @@ import java.io.File;
 public class SpotifyAPI implements PacketHandler {
 
     private final WinSpotifyConnector spotifyConnector;
+    private final ExecutorService connectExecutor = Executors.newSingleThreadExecutor();
 
     private Track track;
 
@@ -53,16 +56,18 @@ public class SpotifyAPI implements PacketHandler {
      * @param connectionRequired Connection required because it's in use
      */
     public void updateConnectionState(boolean connectionRequired) {
-        try {
-            // Connect if required and disconnect if not required
-            if (connectionRequired && !this.spotifyConnector.isConnected()) {
-                this.spotifyConnector.prepareAndConnectAsync();
-            } else if (!connectionRequired && this.spotifyConnector.isConnected()) {
-                this.spotifyConnector.disconnect();
+        this.connectExecutor.execute(() -> {
+            try {
+                // Connect if required and disconnect if not required
+                if (connectionRequired && !this.spotifyConnector.isConnected()) {
+                    this.spotifyConnector.prepareAndConnect();
+                } else if (!connectionRequired && this.spotifyConnector.isConnected()) {
+                    this.spotifyConnector.disconnect();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     public long getProgress() {

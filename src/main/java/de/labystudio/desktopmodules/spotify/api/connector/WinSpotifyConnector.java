@@ -15,8 +15,8 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -31,8 +31,6 @@ public class WinSpotifyConnector {
     private static final long UPDATE_INTERVAL_SECONDS = 1;
     private static final int SOCKET_TIMEOUT_MS = 5000;
     private static final SocketAddress ADDRESS_SOCKET_API = new InetSocketAddress("localhost", 32018);
-
-    private final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
     private final File fileSpotifyApi;
     private final PacketHandler packetHandler;
@@ -60,22 +58,23 @@ public class WinSpotifyConnector {
     }
 
     /**
-     * Prepare the spotify api executable and connect to it asynchronously
+     * Prepare the spotify api executable and connect to it
      */
-    public void prepareAndConnectAsync() {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            try {
-                // Download latest executable
-                new WinSpotifyExecutableProvider(this.fileSpotifyApi).provideLatestVersion();
+    public void prepareAndConnect() {
+        try {
+            // Download latest executable
+            new WinSpotifyExecutableProvider(this.fileSpotifyApi).provideLatestVersion();
 
-                // Connect if executable is available
-                if (this.fileSpotifyApi.exists()) {
-                    connect();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+            // Connect if executable is available
+            if (this.fileSpotifyApi.exists()) {
+                connect();
             }
-        });
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            // Disconnect
+            disconnect();
+        }
     }
 
     /**
@@ -103,7 +102,8 @@ public class WinSpotifyConnector {
 
         // Run repeating task
         if (this.task == null || this.task.isDone() || this.task.isCancelled()) {
-            this.task = this.scheduledExecutor.scheduleAtFixedRate(this::onUpdate, 0, UPDATE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+            this.task = Executors.newSingleThreadScheduledExecutor()
+                    .scheduleAtFixedRate(this::onUpdate, 0, UPDATE_INTERVAL_SECONDS, TimeUnit.SECONDS);
         }
     }
 
@@ -148,6 +148,8 @@ public class WinSpotifyConnector {
                     }
                 }
             }
+        } catch (InterruptedException e) {
+            // Ignore
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -166,6 +168,21 @@ public class WinSpotifyConnector {
      * Disconnect from the executable
      */
     public void disconnect() {
+        // Stop task
+        if (this.task != null && !this.task.isCancelled() && !this.task.isDone()) {
+            this.task.cancel(true);
+        }
+
+        // Close socket connection
+        if (this.socket != null && !this.socket.isClosed()) {
+            try {
+                this.socket.close();
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }
+
+        // Close executable
         if (this.process != null && this.process.isAlive()) {
             this.process.destroyForcibly();
         }
