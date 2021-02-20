@@ -1,7 +1,9 @@
 package de.labystudio.desktopmodules.spotify.api.protocol;
 
 import de.labystudio.desktopmodules.spotify.api.protocol.packet.DataPacket;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.NextPacket;
 import de.labystudio.desktopmodules.spotify.api.protocol.packet.PlayPausePacket;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.PreviousPacket;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -19,7 +21,8 @@ public class PacketRegistry {
     static {
         register(0, DataPacket.class);
         register(1, PlayPausePacket.class);
-        register(1, PlayPausePacket.class);
+        register(2, NextPacket.class);
+        register(3, PreviousPacket.class);
     }
 
     /**

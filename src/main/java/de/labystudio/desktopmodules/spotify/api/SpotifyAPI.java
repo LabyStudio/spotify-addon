@@ -1,5 +1,9 @@
 package de.labystudio.desktopmodules.spotify.api;
 
+import de.labystudio.desktopmodules.spotify.api.connector.WinSpotifyConnector;
+import de.labystudio.desktopmodules.spotify.api.protocol.PacketHandler;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.DataPacket;
+
 import java.io.File;
 
 /**
@@ -7,12 +11,40 @@ import java.io.File;
  *
  * @author LabyStudio
  */
-public class SpotifyAPI {
+public class SpotifyAPI implements PacketHandler {
 
     private final WinSpotifyConnector spotifyConnector;
 
+    private Track track;
+
+    private boolean playing;
+    private int progress;
+
+    private long timeLastPaused;
+
     public SpotifyAPI(File directory) {
-        this.spotifyConnector = new WinSpotifyConnector(directory);
+        this.spotifyConnector = new WinSpotifyConnector(directory, this);
+    }
+
+    @Override
+    public void handleDataPacket(DataPacket packet) {
+        String name = packet.getTrackName();
+        String artist = packet.getTrackArtist();
+        int length = packet.getTrackLength();
+
+        // Update track and playing state
+        if ((this.playing = packet.isPlaying()) && (this.track == null || this.track.hasChanged(packet))) {
+            this.track = new Track(name, artist, length);
+            this.timeLastPaused = System.currentTimeMillis();
+        }
+
+        // Store paused time
+        if (!this.playing) {
+            this.timeLastPaused = System.currentTimeMillis();
+        }
+
+        // Update track progress
+        this.progress = packet.getProgress();
     }
 
     /**
@@ -33,7 +65,26 @@ public class SpotifyAPI {
         }
     }
 
+    public long getProgress() {
+        // No song playing
+        if (this.track == null) {
+            return 0;
+        }
+
+        // Calculate progress
+        long demonTime = this.progress + (this.playing ? System.currentTimeMillis() - this.timeLastPaused : 0);
+        return Math.min(demonTime, this.track.getLength());
+    }
+
     public WinSpotifyConnector getSpotifyConnector() {
         return spotifyConnector;
+    }
+
+    public boolean isPlaying() {
+        return playing;
+    }
+
+    public Track getTrack() {
+        return track;
     }
 }

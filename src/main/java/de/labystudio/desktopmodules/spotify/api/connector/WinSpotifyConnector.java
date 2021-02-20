@@ -1,4 +1,4 @@
-package de.labystudio.desktopmodules.spotify.api;
+package de.labystudio.desktopmodules.spotify.api.connector;
 
 import de.labystudio.desktopmodules.spotify.api.protocol.CommandPacket;
 import de.labystudio.desktopmodules.spotify.api.protocol.PacketHandler;
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author LabyStudio
  */
-public class WinSpotifyConnector implements PacketHandler {
+public class WinSpotifyConnector {
 
     private static final long UPDATE_INTERVAL_SECONDS = 1;
     private static final int SOCKET_TIMEOUT_MS = 5000;
@@ -35,6 +35,8 @@ public class WinSpotifyConnector implements PacketHandler {
     private final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
     private final File fileSpotifyApi;
+    private final PacketHandler packetHandler;
+
     private final Queue<SpotifyPacket> packetQueue = new LinkedList<>();
 
     private Process process;
@@ -44,15 +46,14 @@ public class WinSpotifyConnector implements PacketHandler {
     private DataInputStream inputStream;
     private DataOutputStream outputStream;
 
-    private DataPacket lastDataPacket;
-
     /**
      * Create the spotify connector
      *
      * @param directory The directory to place the executable
      */
-    public WinSpotifyConnector(File directory) {
+    public WinSpotifyConnector(File directory, PacketHandler packetHandler) {
         this.fileSpotifyApi = new File(directory, "SpotifyAPI.exe");
+        this.packetHandler = packetHandler;
 
         // Attach shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(this::disconnect));
@@ -110,6 +111,9 @@ public class WinSpotifyConnector implements PacketHandler {
      * Keep the connection alive and request the latest spotify state
      */
     private void onUpdate() {
+        // Request Spotify data each update
+        sendPacket(new DataPacket());
+
         try {
             // Reconnect if socket is closed
             if (!isConnected()) {
@@ -139,7 +143,7 @@ public class WinSpotifyConnector implements PacketHandler {
                         // Read and handle packet data
                         if (receivedPacket != null) {
                             receivedPacket.read(this.inputStream);
-                            receivedPacket.handlePacket(this);
+                            receivedPacket.handlePacket(this.packetHandler);
                         }
                     }
                 }
@@ -147,14 +151,6 @@ public class WinSpotifyConnector implements PacketHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // Request Spotify Data
-        sendPacket(new DataPacket());
-    }
-
-    @Override
-    public void handleDataPacket(DataPacket packet) {
-        this.lastDataPacket = packet;
     }
 
     /**
@@ -182,10 +178,6 @@ public class WinSpotifyConnector implements PacketHandler {
      */
     public boolean isConnected() {
         return this.socket != null && this.socket.isConnected() && !this.socket.isClosed();
-    }
-
-    public DataPacket getLastDataPacket() {
-        return lastDataPacket;
     }
 
     /**

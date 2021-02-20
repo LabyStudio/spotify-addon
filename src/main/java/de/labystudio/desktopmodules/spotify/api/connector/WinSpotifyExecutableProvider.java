@@ -1,4 +1,4 @@
-package de.labystudio.desktopmodules.spotify.api;
+package de.labystudio.desktopmodules.spotify.api.connector;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
