@@ -9,6 +9,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+/**
+ * Error packet sent from the api
+ *
+ * @author LabyStudio
+ */
 public class ErrorPacket extends SpotifyPacket {
 
     private final Byte id;

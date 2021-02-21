@@ -1,5 +1,9 @@
 package de.labystudio.desktopmodules.spotify.api.protocol;
 
+/**
+ * Error debug codes of the SpotifyAPI executable
+ * @author LabyStudio
+ */
 public enum ErrorType {
     SPOTIFY_NOT_OPEN(1, "Spotify is not open"),
     SPOTIFY_PROCESS_INVALID(2, "Invalid Spotify process"),
@@ -8,7 +12,14 @@ public enum ErrorType {
     CAN_NOT_FIND_ADDRESS(5, "SpotifyAPI is outdated"),
     CAN_NOT_FIND_TRACK_ID(6, "Could not find track id");
 
+    /**
+     * Unique error id
+     */
     private final int code;
+
+    /**
+     * Error message
+     */
     private final String message;
 
     ErrorType(int code, String message) {
