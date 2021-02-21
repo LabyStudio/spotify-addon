@@ -43,7 +43,6 @@ public class LyricsProvider {
     public void requestAsync(Track track, Consumer<Lyrics> callback) {
         // Execute in thread
         this.executor.execute(() -> {
-
             // Request lyrics of track
             Lyrics lyric = request(track);
 
@@ -64,8 +63,6 @@ public class LyricsProvider {
             try {
                 // Find lyrics for this database
                 Lyrics lyric = lyricSource.get(track);
-
-                System.out.println(lyricSource.getClass().getSimpleName() + " has " + lyric);
 
                 // Return if available
                 if (lyric != null) {

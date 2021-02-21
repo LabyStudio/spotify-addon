@@ -63,7 +63,23 @@ public class LyricsReader {
                     // Get timecode
                     long minutes = Integer.parseInt(matcher.group(1));
                     long seconds = Integer.parseInt(matcher.group(2));
-                    long milliseconds = Integer.parseInt(matcher.group(3)) * 10L;
+
+                    String msString = matcher.group(3);
+                    long msPercentage = Integer.parseInt(msString);
+
+                    // Convert ms percentage to milliseconds
+                    long milliseconds = 0;
+                    switch (msString.length()) {
+                        case 1:
+                            milliseconds = msPercentage * 100;
+                            break;
+                        case 2:
+                            milliseconds = msPercentage * 10;
+                            break;
+                        case 3:
+                            milliseconds = msPercentage;
+                            break;
+                    }
 
                     // Convert timecode to timestamp
                     long offset = milliseconds + seconds * 1000 + minutes * 1000 * 60;
