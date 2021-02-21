@@ -16,6 +16,15 @@ and control buttons.
 
 ![Preview](.github/assets/preview.png)
 
+### Lyrics
+This addon has an additional module that displays the lyrics to the song.
+
+##### The currently supported lyrics sources are
+- https://crintsoft.com/
+- http://music.163.com/
+
+![Preview](.github/assets/lyrics.png)
+
 ## Installation
 This addon requires the core application [DesktopModules](https://github.com/LabyStudio/desktopmodules)
 

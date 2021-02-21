@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class WinSpotifyConnector {
 
-    private static final long UPDATE_INTERVAL_SECONDS = 3;
+    private static final long UPDATE_INTERVAL_SECONDS = 1;
     private static final int SOCKET_TIMEOUT_MS = 5000;
     private static final SocketAddress ADDRESS_SOCKET_API = new InetSocketAddress("localhost", 32018);
 
