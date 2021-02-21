@@ -1,11 +1,12 @@
 package de.labystudio.desktopmodules.spotify.api;
 
 import de.labystudio.desktopmodules.spotify.api.connector.WinSpotifyConnector;
+import de.labystudio.desktopmodules.spotify.api.protocol.ErrorType;
 import de.labystudio.desktopmodules.spotify.api.protocol.PacketHandler;
-import de.labystudio.desktopmodules.spotify.api.protocol.packet.DataPacket;
-import de.labystudio.desktopmodules.spotify.api.protocol.packet.NextPacket;
-import de.labystudio.desktopmodules.spotify.api.protocol.packet.PlayPausePacket;
-import de.labystudio.desktopmodules.spotify.api.protocol.packet.PreviousPacket;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.both.DataPacket;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.client.NextPacket;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.client.PlayPausePacket;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.client.PreviousPacket;
 import de.labystudio.desktopmodules.spotify.api.rest.OpenSpotifyAPI;
 
 import java.io.File;
@@ -41,6 +42,11 @@ public class SpotifyAPI implements PacketHandler {
      * Called when the track changed
      */
     private final List<Consumer<Track>> trackChangeListeners = new ArrayList<>();
+
+    /**
+     * The last error type (Is null if there is no error)
+     */
+    private ErrorType lastErrorType;
 
     /**
      * The current running track
@@ -99,6 +105,13 @@ public class SpotifyAPI implements PacketHandler {
 
         // Update track progress
         this.progress = packet.getProgress();
+        this.lastErrorType = null;
+    }
+
+    @Override
+    public void handleExecutableError(ErrorType type) {
+        this.lastErrorType = type;
+        this.track = null;
     }
 
     /**
@@ -113,7 +126,7 @@ public class SpotifyAPI implements PacketHandler {
                 if (connectionRequired && !this.spotifyConnector.isConnected()) {
                     this.spotifyConnector.prepareAndConnect();
                 } else if (!connectionRequired && this.spotifyConnector.isConnected()) {
-                    this.spotifyConnector.disconnect();
+                    this.spotifyConnector.disconnect(false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -125,7 +138,7 @@ public class SpotifyAPI implements PacketHandler {
      * Force the Spotify connector to shutdown.
      */
     public void forceDisconnect() {
-        this.spotifyConnector.disconnect();
+        this.spotifyConnector.disconnect(false);
     }
 
     /**
@@ -188,6 +201,15 @@ public class SpotifyAPI implements PacketHandler {
      */
     public Track getTrack() {
         return track;
+    }
+
+    /**
+     * The last error from the executable (Is null if there is no error)
+     *
+     * @return Error type
+     */
+    public ErrorType getLastErrorType() {
+        return lastErrorType;
     }
 
     /**

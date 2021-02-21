@@ -1,6 +1,6 @@
 package de.labystudio.desktopmodules.spotify.api;
 
-import de.labystudio.desktopmodules.spotify.api.protocol.packet.DataPacket;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.both.DataPacket;
 
 import java.awt.image.BufferedImage;
 

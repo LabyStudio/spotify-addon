@@ -10,6 +10,7 @@ import de.labystudio.desktopmodules.core.renderer.font.StringEffect;
 import de.labystudio.desktopmodules.spotify.SpotifyAddon;
 import de.labystudio.desktopmodules.spotify.api.SpotifyAPI;
 import de.labystudio.desktopmodules.spotify.api.Track;
+import de.labystudio.desktopmodules.spotify.api.protocol.ErrorType;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -65,17 +66,23 @@ public class SpotifyModule extends Module<SpotifyAddon> {
         }
 
         // Draw track title and artist
-        if (track != null) {
+        {
             int y = 24;
             int x = this.rightBound ? width - height - 5 : height + 5;
 
-            String title = track.getName().length() > 34 ? track.getName().substring(0, 34) : track.getName();
-            String artist = track.getArtist().length() > 34 ? track.getArtist().substring(0, 34) : track.getArtist();
+            String title = track == null ? "Spotify" : track.getName().length() > 34 ? track.getName().substring(0, 34) : track.getName();
+            String subTitle = track == null ? "No song playing" : track.getArtist().length() > 34 ? track.getArtist().substring(0, 34) : track.getArtist();
+
+            // Set error message if present
+            ErrorType errorType = api.getLastErrorType();
+            if (errorType != null) {
+                subTitle = errorType.getMessage();
+            }
 
             // Draw text
             StringEffect stringEffect = extendedModule ? StringEffect.NONE : StringEffect.SHADOW;
             context.drawString(title, x, y, StringAlignment.from(this.rightBound), stringEffect, Color.WHITE, FONT_TITLE);
-            context.drawString(artist, x, y * 2, StringAlignment.from(this.rightBound), stringEffect, Color.WHITE, FONT_TITLE);
+            context.drawString(subTitle, x, y * 2, StringAlignment.from(this.rightBound), stringEffect, Color.WHITE, FONT_TITLE);
         }
 
         // Change module rendering depending on mouse hover state

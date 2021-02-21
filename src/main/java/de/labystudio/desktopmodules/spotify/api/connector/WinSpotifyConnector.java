@@ -1,10 +1,10 @@
 package de.labystudio.desktopmodules.spotify.api.connector;
 
-import de.labystudio.desktopmodules.spotify.api.protocol.CommandPacket;
 import de.labystudio.desktopmodules.spotify.api.protocol.PacketHandler;
 import de.labystudio.desktopmodules.spotify.api.protocol.PacketRegistry;
-import de.labystudio.desktopmodules.spotify.api.protocol.SpotifyPacket;
-import de.labystudio.desktopmodules.spotify.api.protocol.packet.DataPacket;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.CommandPacket;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.SpotifyPacket;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.both.DataPacket;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -19,6 +19,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import static de.labystudio.desktopmodules.spotify.api.protocol.PacketRegistry.RegistryChannel.CLIENT;
+import static de.labystudio.desktopmodules.spotify.api.protocol.PacketRegistry.RegistryChannel.SERVER;
 
 /**
  * Windows Spotify connector
@@ -56,7 +59,7 @@ public class WinSpotifyConnector {
         this.packetHandler = packetHandler;
 
         // Attach shutdown hook
-        Runtime.getRuntime().addShutdownHook(new Thread(this::disconnect));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> disconnect(false)));
     }
 
     /**
@@ -74,8 +77,7 @@ public class WinSpotifyConnector {
         } catch (Exception e) {
             e.printStackTrace();
 
-            // Disconnect
-            disconnect();
+            disconnect(true);
         }
     }
 
@@ -124,6 +126,8 @@ public class WinSpotifyConnector {
             handlePacketQueue();
         } catch (Exception e) {
             e.printStackTrace();
+
+            disconnect(true);
         }
     }
 
@@ -136,7 +140,7 @@ public class WinSpotifyConnector {
         // Send next packet in queue
         SpotifyPacket packet = this.packetQueue.poll();
         if (packet != null) {
-            Byte id = PacketRegistry.getIdOf(packet.getClass());
+            Byte id = PacketRegistry.getIdOf(CLIENT, packet.getClass());
 
             // Write packet to socket
             if (id != null) {
@@ -153,7 +157,7 @@ public class WinSpotifyConnector {
                 if (!(packet instanceof CommandPacket)) {
                     // Read packet type
                     int packetId = readInt(this.inputStream);
-                    SpotifyPacket receivedPacket = PacketRegistry.createById((byte) packetId);
+                    SpotifyPacket receivedPacket = PacketRegistry.createById(SERVER, (byte) packetId);
 
                     // Read and handle packet data
                     if (receivedPacket != null) {
@@ -205,10 +209,12 @@ public class WinSpotifyConnector {
 
     /**
      * Disconnect from the executable
+     *
+     * @param restartable The connector is able to reconnect after the disconnect
      */
-    public void disconnect() {
+    public void disconnect(boolean restartable) {
         // Stop task
-        if (this.task != null && !this.task.isCancelled() && !this.task.isDone()) {
+        if (!restartable && this.task != null && !this.task.isCancelled() && !this.task.isDone()) {
             this.task.cancel(true);
         }
 

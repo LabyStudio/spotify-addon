@@ -1,7 +1,7 @@
-package de.labystudio.desktopmodules.spotify.api.protocol.packet;
+package de.labystudio.desktopmodules.spotify.api.protocol.packet.both;
 
 import de.labystudio.desktopmodules.spotify.api.protocol.PacketHandler;
-import de.labystudio.desktopmodules.spotify.api.protocol.SpotifyPacket;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.SpotifyPacket;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
