@@ -1,5 +1,6 @@
 package de.labystudio.desktopmodules.spotify.modules;
 
+import com.google.gson.JsonObject;
 import de.labystudio.desktopmodules.core.loader.TextureLoader;
 import de.labystudio.desktopmodules.core.module.Module;
 import de.labystudio.desktopmodules.core.renderer.IRenderContext;
@@ -40,6 +41,14 @@ public class LyricsModule extends Module<SpotifyAddon> {
 
     public LyricsModule() {
         super(550, 25);
+    }
+
+    @Override
+    public void onInitialize(SpotifyAddon addon, JsonObject config) {
+        super.onInitialize(addon, config);
+
+        // Reset custom offset shit
+        addon.getSpotifyAPI().addTrackChangeListener(track -> this.customOffsetShift = 0);
     }
 
     @Override
