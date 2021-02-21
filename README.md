@@ -28,7 +28,7 @@ This addon has an additional module that displays the lyrics to the song.
 ## Installation
 This addon requires the core application [DesktopModules](https://github.com/LabyStudio/desktopmodules)
 
-You can download the addon jar file [here](https://github.com/LabyStudio/spotify-addon/actions) <br>
+You can download the addon jar file [here](https://github.com/LabyStudio/spotify-addon/releases/) <br>
 Put the built jar file into the following directory: ``C:/Users/<name>/AppData/Roaming/DesktopModules/addons/``<br>
 And then you are ready to launch the core application.
 
