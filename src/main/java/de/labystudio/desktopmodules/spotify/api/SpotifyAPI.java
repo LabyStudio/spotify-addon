@@ -3,6 +3,9 @@ package de.labystudio.desktopmodules.spotify.api;
 import de.labystudio.desktopmodules.spotify.api.connector.WinSpotifyConnector;
 import de.labystudio.desktopmodules.spotify.api.protocol.PacketHandler;
 import de.labystudio.desktopmodules.spotify.api.protocol.packet.DataPacket;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.NextPacket;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.PlayPausePacket;
+import de.labystudio.desktopmodules.spotify.api.protocol.packet.PreviousPacket;
 import de.labystudio.desktopmodules.spotify.api.rest.OpenSpotifyAPI;
 
 import java.io.File;
@@ -113,6 +116,25 @@ public class SpotifyAPI implements PacketHandler {
     }
 
     /**
+     * Send media command to the spotify connector
+     *
+     * @param command Media command type
+     */
+    public void sendMediaCommand(EnumMediaCommand command) {
+        switch (command) {
+            case PREVIOUS:
+                this.spotifyConnector.sendPacketAndFlush(new PreviousPacket());
+                break;
+            case PLAY_PAUSE:
+                this.spotifyConnector.sendPacketAndFlush(new PlayPausePacket());
+                break;
+            case NEXT:
+                this.spotifyConnector.sendPacketAndFlush(new NextPacket());
+                break;
+        }
+    }
+
+    /**
      * Get the prediction of the current progress
      *
      * @return Calculated playing progress in ms
@@ -145,4 +167,12 @@ public class SpotifyAPI implements PacketHandler {
     public Track getTrack() {
         return track;
     }
+
+    /**
+     * Spotify media commands
+     */
+    public enum EnumMediaCommand {
+        PREVIOUS, PLAY_PAUSE, NEXT
+    }
+
 }

@@ -139,6 +139,37 @@ public class SpotifyModule extends Module<SpotifyAddon> {
     }
 
     @Override
+    public void onMousePressed(int x, int y, int mouseButton) {
+        int controlsX = this.rightBound ? 20 : this.width - 45;
+        int controlsY = 25;
+
+        SpotifyAPI api = this.addon.getSpotifyAPI();
+
+        if (y > controlsY && y < controlsY + 24) {
+            // Previous
+            if (x > controlsX - 11 && x < controlsX) {
+                api.sendMediaCommand(SpotifyAPI.EnumMediaCommand.PREVIOUS);
+                return;
+            }
+
+            // Play/pause
+            if (x > controlsX && x < controlsX + 17) {
+                api.sendMediaCommand(SpotifyAPI.EnumMediaCommand.PLAY_PAUSE);
+                return;
+            }
+
+            // Next
+            if (x > controlsX + 28 && x < controlsX + 28 + 11) {
+                api.sendMediaCommand(SpotifyAPI.EnumMediaCommand.NEXT);
+                return;
+            }
+        }
+
+        // Call super method to make module moveable
+        super.onMousePressed(x, y, mouseButton);
+    }
+
+    @Override
     public void onTick() {
 
     }

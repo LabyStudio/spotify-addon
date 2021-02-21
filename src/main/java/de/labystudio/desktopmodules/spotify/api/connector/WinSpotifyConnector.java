@@ -16,6 +16,7 @@ import java.net.SocketAddress;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -27,9 +28,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class WinSpotifyConnector {
 
-    private static final long UPDATE_INTERVAL_SECONDS = 1;
+    private static final long UPDATE_INTERVAL_SECONDS = 3;
     private static final int SOCKET_TIMEOUT_MS = 5000;
     private static final SocketAddress ADDRESS_SOCKET_API = new InetSocketAddress("localhost", 32018);
+
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     private final File fileSpotifyApi;
     private final PacketHandler packetHandler;
@@ -101,13 +104,12 @@ public class WinSpotifyConnector {
 
         // Run repeating task
         if (this.task == null || this.task.isDone() || this.task.isCancelled()) {
-            this.task = Executors.newSingleThreadScheduledExecutor()
-                    .scheduleAtFixedRate(this::onUpdate, 0, UPDATE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+            this.task = this.executor.scheduleAtFixedRate(this::onUpdate, 0, UPDATE_INTERVAL_SECONDS, TimeUnit.SECONDS);
         }
     }
 
     /**
-     * Keep the connection alive and request the latest spotify state
+     * Request the current spotify data and handle all packets in the queue
      */
     private void onUpdate() {
         // Request Spotify data each update
@@ -119,38 +121,42 @@ public class WinSpotifyConnector {
                 connect();
             }
 
-            // Send next packet in queue
-            SpotifyPacket packet = this.packetQueue.poll();
-            if (packet != null) {
-                Byte id = PacketRegistry.getIdOf(packet.getClass());
+            handlePacketQueue();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-                // Write packet to socket
-                if (id != null) {
-                    this.outputStream.writeByte(id);
-                    packet.write(this.outputStream);
-                    this.outputStream.flush();
+    /**
+     * Send the next packet in the queue and handel the response
+     *
+     * @throws Exception Connection exception
+     */
+    private void handlePacketQueue() throws Exception {
+        // Send next packet in queue
+        SpotifyPacket packet = this.packetQueue.poll();
+        if (packet != null) {
+            Byte id = PacketRegistry.getIdOf(packet.getClass());
 
-                    // Wait before sending the next command
-                    Thread.sleep(200L);
+            // Write packet to socket
+            if (id != null) {
+                this.outputStream.writeByte(id);
+                packet.write(this.outputStream);
+                this.outputStream.flush();
 
-                    // Command packets have no response
-                    if (!(packet instanceof CommandPacket)) {
-                        // Read packet type
-                        int packetId = readInt(this.inputStream);
-                        SpotifyPacket receivedPacket = PacketRegistry.createById((byte) packetId);
+                // Command packets have no response
+                if (!(packet instanceof CommandPacket)) {
+                    // Read packet type
+                    int packetId = readInt(this.inputStream);
+                    SpotifyPacket receivedPacket = PacketRegistry.createById((byte) packetId);
 
-                        // Read and handle packet data
-                        if (receivedPacket != null) {
-                            receivedPacket.read(this.inputStream);
-                            receivedPacket.handlePacket(this.packetHandler);
-                        }
+                    // Read and handle packet data
+                    if (receivedPacket != null) {
+                        receivedPacket.read(this.inputStream);
+                        receivedPacket.handlePacket(this.packetHandler);
                     }
                 }
             }
-        } catch (InterruptedException e) {
-            // Ignore
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -161,6 +167,35 @@ public class WinSpotifyConnector {
      */
     public void sendPacket(SpotifyPacket packet) {
         this.packetQueue.add(packet);
+    }
+
+    /**
+     * Add a spotify packet to the send queue and flush the entire queue right after
+     *
+     * @param packet Spotify packet to send and flush
+     */
+    public void sendPacketAndFlush(SpotifyPacket packet) {
+        // Add packet to queue
+        sendPacket(packet);
+
+        // Async packet handling
+        this.executor.execute(() -> {
+            try {
+                // Handle all packets in the queue
+                while (!this.packetQueue.isEmpty()) {
+                    // Flush
+                    handlePacketQueue();
+                }
+
+                // Wait for the operating system to handle the media key
+                Thread.sleep(200);
+
+                // Update the spotify data again
+                onUpdate();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     /**
