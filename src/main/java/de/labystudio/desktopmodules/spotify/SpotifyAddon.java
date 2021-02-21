@@ -1,7 +1,6 @@
 package de.labystudio.desktopmodules.spotify;
 
 import de.labystudio.desktopmodules.core.addon.Addon;
-import de.labystudio.desktopmodules.core.module.Module;
 import de.labystudio.desktopmodules.spotify.api.SpotifyAPI;
 import de.labystudio.desktopmodules.spotify.api.lyrics.LyricsProvider;
 import de.labystudio.desktopmodules.spotify.api.lyrics.reader.Lyrics;
@@ -21,7 +20,7 @@ public class SpotifyAddon extends Addon {
     private Lyrics lyrics;
 
     @Override
-    public void onEnable() throws Exception {
+    public void onInitialize() throws Exception {
         this.lyricsProvider = new LyricsProvider();
         this.spotifyAPI = new SpotifyAPI(getConfigDirectory());
 
@@ -34,13 +33,13 @@ public class SpotifyAddon extends Addon {
     }
 
     @Override
-    public void onDisable() {
-        this.spotifyAPI.forceDisconnect();
+    public void onEnable() {
+        this.spotifyAPI.connect();
     }
 
     @Override
-    public void onModuleVisibilityChanged(Module<? extends Addon> module, boolean enabled) {
-        this.spotifyAPI.updateConnectionState(hasActiveModules());
+    public void onDisable() {
+        this.spotifyAPI.disconnect();
     }
 
     public SpotifyAPI getSpotifyAPI() {

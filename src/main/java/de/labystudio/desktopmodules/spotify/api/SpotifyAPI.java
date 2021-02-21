@@ -115,21 +115,13 @@ public class SpotifyAPI implements PacketHandler {
     }
 
     /**
-     * Update the connection depending if required or not
-     *
-     * @param connectionRequired Connection required because it's in use
+     * Connect to the Spotify api
      */
-    public void updateConnectionState(boolean connectionRequired) {
+    public void connect() {
         this.connectExecutor.execute(() -> {
-            try {
-                // Connect if required and disconnect if not required
-                if (connectionRequired && !this.spotifyConnector.isConnected()) {
-                    this.spotifyConnector.prepareAndConnect();
-                } else if (!connectionRequired && this.spotifyConnector.isConnected()) {
-                    this.spotifyConnector.disconnect(false);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+            // Connect if not connected yet
+            if (!this.spotifyConnector.isConnected()) {
+                this.spotifyConnector.prepareAndConnect();
             }
         });
     }
@@ -137,8 +129,8 @@ public class SpotifyAPI implements PacketHandler {
     /**
      * Force the Spotify connector to shutdown.
      */
-    public void forceDisconnect() {
-        this.spotifyConnector.disconnect(false);
+    public void disconnect() {
+        this.connectExecutor.execute(() -> this.spotifyConnector.disconnect(false));
     }
 
     /**
