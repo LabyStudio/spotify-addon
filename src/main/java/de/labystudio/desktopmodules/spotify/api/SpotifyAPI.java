@@ -9,8 +9,11 @@ import de.labystudio.desktopmodules.spotify.api.protocol.packet.PreviousPacket;
 import de.labystudio.desktopmodules.spotify.api.rest.OpenSpotifyAPI;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 /**
  * Spotify API
@@ -33,6 +36,11 @@ public class SpotifyAPI implements PacketHandler {
      * Open spotify api
      */
     private final OpenSpotifyAPI openSpotifyApi = new OpenSpotifyAPI();
+
+    /**
+     * Called when the track changed
+     */
+    private final List<Consumer<Track>> trackChangeListeners = new ArrayList<>();
 
     /**
      * The current running track
@@ -72,6 +80,11 @@ public class SpotifyAPI implements PacketHandler {
 
             // Progress value updates on track change
             this.timeLastProgressChanged = System.currentTimeMillis();
+
+            // Call change listeners
+            for (Consumer<Track> listener : this.trackChangeListeners) {
+                listener.accept(this.track);
+            }
 
             // Update cover image
             this.openSpotifyApi.requestImageAsync(this.track, image -> {
@@ -132,6 +145,15 @@ public class SpotifyAPI implements PacketHandler {
                 this.spotifyConnector.sendPacketAndFlush(new NextPacket());
                 break;
         }
+    }
+
+    /**
+     * Register a track change listener
+     *
+     * @param listener The listener
+     */
+    public void addTrackChangeListener(Consumer<Track> listener) {
+        this.trackChangeListeners.add(listener);
     }
 
     /**
