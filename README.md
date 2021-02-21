@@ -23,7 +23,7 @@ This addon has an additional module that displays the lyrics to the song.
 - https://crintsoft.com/
 - http://music.163.com/
 
-![Preview](.github/assets/lyrics.png)
+![Preview](.github/assets/lyrics.gif)
 
 ## Installation
 This addon requires the core application [DesktopModules](https://github.com/LabyStudio/desktopmodules)
