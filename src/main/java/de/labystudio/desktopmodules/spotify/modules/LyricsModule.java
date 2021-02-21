@@ -110,7 +110,7 @@ public class LyricsModule extends Module<SpotifyAddon> {
 
             // Draw artist name
             context.drawString(track == null ? "No song playing" : track.getArtist(),
-                    this.rightBound ? this.width - this.height - 5 : this.height + 5, (float) 24,
+                    this.rightBound ? this.width - this.height - 5 : this.height + 5, (float) 22,
                     StringAlignment.from(this.rightBound), StringEffect.NONE, Color.WHITE, FONT);
             return;
         }

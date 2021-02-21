@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Crintsoft lyris database
+ * Crintsoft lyrics database
  * https://crintsoft.com/
  */
 public class CrintSoftSource extends LyricsSource {
