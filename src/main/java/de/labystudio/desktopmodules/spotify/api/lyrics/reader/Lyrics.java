@@ -65,4 +65,12 @@ public class Lyrics {
         return voiceLines;
     }
 
+    /**
+     * Check if the lyrics has any voice lines
+     *
+     * @return Voice lines are available
+     */
+    public boolean hasLines() {
+        return !this.voiceLines.isEmpty();
+    }
 }

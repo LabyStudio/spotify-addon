@@ -144,6 +144,11 @@ public class WinSpotifyConnector {
                 packet.write(this.outputStream);
                 this.outputStream.flush();
 
+                // Cancel if the connection is closed
+                if (!isConnected()) {
+                    return;
+                }
+
                 // Command packets have no response
                 if (!(packet instanceof CommandPacket)) {
                     // Read packet type
