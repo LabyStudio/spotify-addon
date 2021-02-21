@@ -3,25 +3,22 @@ package de.labystudio.desktopmodules.spotify;
 import de.labystudio.desktopmodules.core.addon.Addon;
 import de.labystudio.desktopmodules.core.module.Module;
 import de.labystudio.desktopmodules.spotify.api.SpotifyAPI;
-import de.labystudio.desktopmodules.spotify.api.Track;
 import de.labystudio.desktopmodules.spotify.api.lyrics.LyricsProvider;
 import de.labystudio.desktopmodules.spotify.api.lyrics.reader.Lyrics;
 import de.labystudio.desktopmodules.spotify.modules.LyricsModule;
 import de.labystudio.desktopmodules.spotify.modules.SpotifyModule;
-
-import java.util.function.Consumer;
 
 /**
  * Spotify addon
  *
  * @author LabyStudio
  */
-public class SpotifyAddon extends Addon implements Consumer<Track> {
+public class SpotifyAddon extends Addon {
 
     private LyricsProvider lyricsProvider;
     private SpotifyAPI spotifyAPI;
 
-    private Lyrics lyrics = new Lyrics();
+    private Lyrics lyrics;
 
     @Override
     public void onEnable() throws Exception {
@@ -29,7 +26,8 @@ public class SpotifyAddon extends Addon implements Consumer<Track> {
         this.spotifyAPI = new SpotifyAPI(getConfigDirectory());
 
         // Register track change listener
-        this.spotifyAPI.addTrackChangeListener(this);
+        this.spotifyAPI.addTrackChangeListener(track ->
+                this.lyricsProvider.requestAsync(track, lyrics -> this.lyrics = lyrics));
 
         registerModule(SpotifyModule.class);
         registerModule(LyricsModule.class);
@@ -41,14 +39,7 @@ public class SpotifyAddon extends Addon implements Consumer<Track> {
     }
 
     @Override
-    public void accept(Track track) {
-        this.lyricsProvider.requestAsync(track, lyrics -> {
-            this.lyrics = lyrics;
-        });
-    }
-
-    @Override
-    public void onModuleVisibilityChanged(Module module, boolean enabled) {
+    public void onModuleVisibilityChanged(Module<? extends Addon> module, boolean enabled) {
         this.spotifyAPI.updateConnectionState(hasActiveModules());
     }
 

@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  */
 public class LyricsReader {
 
-    private static final Pattern TIME_PATTERN = Pattern.compile("[\\[]([0-9]{2}):([0-9]{2}).([0-9]{2})[\\]]");
+    private static final Pattern TIME_PATTERN = Pattern.compile("[\\[]([0-9]{2}):([0-9]{2}).([0-9]*)[\\]]");
     private static final Comparator<VoiceLine> OFFSET_COMPARATOR = Comparator.comparingLong(VoiceLine::getOffset);
 
     private final Scanner scanner;
@@ -52,11 +52,12 @@ public class LyricsReader {
             String dataLine = this.scanner.nextLine();
 
             if (dataLine.contains("[") && dataLine.contains("]")) {
+
                 // Find timecodes
                 Matcher matcher = TIME_PATTERN.matcher(dataLine);
 
                 int timeCodeLength = 0;
-                List<Long> offsets = new ArrayList<Long>();
+                List<Long> offsets = new ArrayList<>();
 
                 while (matcher.find()) {
                     // Get timecode
@@ -88,7 +89,7 @@ public class LyricsReader {
 
         // Wrong format?
         if (voiceLines.isEmpty()) {
-            return lyric;
+            return null;
         }
 
         // Sort offsets

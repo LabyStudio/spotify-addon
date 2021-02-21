@@ -38,7 +38,7 @@ public class LyricsProvider {
      * Search in all databases for the lyrics of the given track asynchronously
      *
      * @param track    The track to find the lyrics to
-     * @param callback Callback for the lyrics if available
+     * @param callback Callback for the lyrics if available (Lyrics can be null)
      */
     public void requestAsync(Track track, Consumer<Lyrics> callback) {
         // Execute in thread
@@ -48,9 +48,7 @@ public class LyricsProvider {
             Lyrics lyric = request(track);
 
             // Call the lyrics callback
-            if (lyric != null) {
-                callback.accept(lyric);
-            }
+            callback.accept(lyric);
         });
     }
 
@@ -66,6 +64,8 @@ public class LyricsProvider {
             try {
                 // Find lyrics for this database
                 Lyrics lyric = lyricSource.get(track);
+
+                System.out.println(lyricSource.getClass().getSimpleName() + " has " + lyric);
 
                 // Return if available
                 if (lyric != null) {

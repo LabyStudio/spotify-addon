@@ -56,7 +56,7 @@ public class LyricsModule extends Module<SpotifyAddon> {
         Lyrics lyrics = this.addon.getLyrics();
 
         // Only if the lyrics has voice lines
-        if (lyrics.hasLines()) {
+        if (lyrics != null && lyrics.hasLines()) {
             long progress = this.addon.getSpotifyAPI().getProgress() + this.customOffsetShift;
 
             // Indicator if the next voice line should be displayed
@@ -100,7 +100,7 @@ public class LyricsModule extends Module<SpotifyAddon> {
         SpotifyAPI api = this.addon.getSpotifyAPI();
 
         // No voice lines in the stack
-        if (!lyrics.hasLines() || this.voiceLineStack[0] == null) {
+        if (lyrics == null || !lyrics.hasLines() || this.voiceLineStack[0] == null) {
             Track track = api.getTrack();
 
             // Draw track name

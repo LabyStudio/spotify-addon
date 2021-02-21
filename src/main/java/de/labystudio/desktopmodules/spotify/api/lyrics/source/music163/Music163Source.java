@@ -25,17 +25,20 @@ public class Music163Source extends LyricsSource {
         String json = request(API_SEARCH, track.getName() + " " + track.getArtist(), null);
         QueryResponse queryResponse = GSON.fromJson(json, QueryResponse.class);
 
+        // Iterate all query results
         for (Song song : queryResponse.result.songs) {
-            // Is track name?
+
+            // Has matching track name
             if (song.name.equalsIgnoreCase(track.getName())) {
 
-                // Is artist name?
+                // Has matching artist name
                 if (song.artists != null && song.artists.length != 0 && song.artists[0].name.equalsIgnoreCase(track.getArtist())) {
                     return loadLyrics(song);
                 }
             }
         }
 
+        // Could not find anything
         return null;
     }
 
@@ -50,6 +53,7 @@ public class Music163Source extends LyricsSource {
         String json = request(API_LYRIC, String.valueOf(song.id), null);
         LyricResponse lyricResponse = GSON.fromJson(json, LyricResponse.class);
 
+        // Wrong format
         if (lyricResponse.lrc == null || lyricResponse.lrc.lyric == null)
             return null;
 
