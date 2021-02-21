@@ -33,4 +33,4 @@ Put the built jar file into the following directory: ``C:/Users/<name>/AppData/R
 And then you are ready to launch the core application.
 
 ## Run in IDE
-Launch the main class ``Start`` with the program parameter ``de.labystudio.desktopmodules.spotify.SpotifyAddon``
+Launch the main class ``StartSpotify``
