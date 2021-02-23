@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.LabyStudio:desktopmodules:2.2'
+    implementation 'com.github.LabyStudio:desktopmodules:2.3'
     //implementation project(':desktopmodules-core')
 }
 

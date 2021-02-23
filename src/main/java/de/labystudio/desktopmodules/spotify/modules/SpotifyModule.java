@@ -67,8 +67,8 @@ public class SpotifyModule extends Module<SpotifyAddon> {
 
         // Draw track title and artist
         {
-            int y = 24;
-            int x = this.rightBound ? width - height - 5 : height + 5;
+            double y = 24;
+            double x = this.rightBound ? width - height - 5 : height + 5;
 
             String title = track == null ? "Spotify" : track.getName().length() > 34 ? track.getName().substring(0, 34) : track.getName();
             String subTitle = track == null ? "No song playing" : track.getArtist().length() > 34 ? track.getArtist().substring(0, 34) : track.getArtist();
@@ -89,19 +89,19 @@ public class SpotifyModule extends Module<SpotifyAddon> {
         if (extendedModule) {
             // Draw controls
             if (track != null) {
-                int x = this.rightBound ? 20 : width - 45;
-                int y = 25;
-                int gradientWidth = 120;
+                double x = this.rightBound ? 20 : width - 45;
+                double y = 25;
+                double gradientWidth = 120;
 
                 // Cover title and artist behind the control buttons
                 if (this.rightBound) {
                     context.drawGradientRect(0, 0, gradientWidth, height,
-                            COLOR_BACKGROUND, gradientWidth / 2, 0,
+                            COLOR_BACKGROUND, gradientWidth / 2D, 0,
                             new Color(0, 0, 0, 0), gradientWidth, 0);
                 } else {
                     context.drawGradientRect(width - gradientWidth, 0, width, height,
                             new Color(0, 0, 0, 0), width - gradientWidth, 0,
-                            COLOR_BACKGROUND, width - gradientWidth / 2, 0);
+                            COLOR_BACKGROUND, width - gradientWidth / 2D, 0);
                 }
 
                 // Draw previous, play pause and next
@@ -112,19 +112,19 @@ public class SpotifyModule extends Module<SpotifyAddon> {
 
             // Draw progress bar
             if (track != null) {
-                int paddingX = context.getStringWidth("00:00", FONT_TIME) + 5;
+                double paddingX = context.getStringWidth("00:00", FONT_TIME) + 5;
 
-                int x = this.rightBound ? paddingX : height + paddingX;
-                int y = height - 5;
+                double x = this.rightBound ? paddingX : height + paddingX;
+                double y = height - 5;
 
-                int progressWidth = this.width - paddingX - x - (this.rightBound ? height : 0);
-                int progressHeight = FONT_TIME.getSize() / 2;
+                double progressWidth = this.width - paddingX - x - (this.rightBound ? height : 0);
+                double progressHeight = FONT_TIME.getSize() / 2F;
 
                 // Background
                 context.drawRectWH(x, y - progressHeight, progressWidth, progressHeight, COLOR_PROGRESS_BACKGROUND);
 
                 // Green bar
-                context.drawRectWH(x, y - progressHeight, (int) (progressWidth / (double) track.getLength() * api.getProgress()), progressHeight, COLOR_PROGRESS);
+                context.drawRectWH(x, y - progressHeight, (progressWidth / (double) track.getLength() * api.getProgress()), progressHeight, COLOR_PROGRESS);
 
                 // Elapsed time
                 String elapsedTime = formatTime(api.getProgress());
@@ -135,12 +135,12 @@ public class SpotifyModule extends Module<SpotifyAddon> {
                 context.drawString(remainingTime, x + progressWidth + 3, y, StringAlignment.LEFT, StringEffect.NONE, Color.WHITE, FONT_TIME);
             }
         } else {
-            int x = this.rightBound ? width - height : 0;
+            double x = this.rightBound ? width - height : 0;
 
             // Draw progress on cover
             if (track != null) {
                 context.drawRectWH(x, height - 3, height, 3, COLOR_PROGRESS_BACKGROUND);
-                context.drawRectWH(x, height - 3, (int) (this.height / (double) track.getLength() * api.getProgress()), 3, COLOR_PROGRESS);
+                context.drawRectWH(x, height - 3, (this.height / (double) track.getLength() * api.getProgress()), 3, COLOR_PROGRESS);
             }
         }
     }

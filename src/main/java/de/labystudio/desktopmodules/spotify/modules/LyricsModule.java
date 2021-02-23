@@ -1,6 +1,7 @@
 package de.labystudio.desktopmodules.spotify.modules;
 
 import com.google.gson.JsonObject;
+import de.labystudio.desktopmodules.core.addon.Addon;
 import de.labystudio.desktopmodules.core.loader.TextureLoader;
 import de.labystudio.desktopmodules.core.module.Module;
 import de.labystudio.desktopmodules.core.renderer.IRenderContext;
@@ -34,6 +35,8 @@ public class LyricsModule extends Module<SpotifyAddon> {
 
     private BufferedImage textureSpotify;
 
+    private boolean smoothAnimation;
+
     private final VoiceLine[] voiceLineStack = new VoiceLine[3];
     private long lastVoiceLineChanged;
 
@@ -49,6 +52,13 @@ public class LyricsModule extends Module<SpotifyAddon> {
 
         // Reset custom offset shit
         addon.getSpotifyAPI().addTrackChangeListener(track -> this.customOffsetShift = 0);
+    }
+
+    @Override
+    public void onLoadConfig(JsonObject config) {
+        super.onLoadConfig(config);
+
+        this.smoothAnimation = Addon.getConfigValue(config, "smooth_animation", true);
     }
 
     @Override
@@ -121,8 +131,17 @@ public class LyricsModule extends Module<SpotifyAddon> {
         // Get the progress of the current playing animation
         double animationProgress = (progress - this.lastVoiceLineChanged) / 50d;
 
+        // The progress in a range from 0 to 12
+        double animationProgressInRange = Math.min(animationProgress, 12);
+
+        // Make it smooth
+        if (this.smoothAnimation) {
+            double sigmoidInput = animationProgress / 2.0;
+            animationProgressInRange = (1 - Math.exp(-sigmoidInput)) / (1 + Math.exp(-sigmoidInput)) * 12;
+        }
+
         // The animated y position of the voice lines
-        double y = 10 - Math.min(animationProgress, 12);
+        double y = 10 - animationProgressInRange;
 
         // Iterate all voice lines in the stack
         for (VoiceLine voiceLine : this.voiceLineStack) {
