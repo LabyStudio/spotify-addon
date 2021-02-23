@@ -1,5 +1,5 @@
 # Spotify Addon
-A module to display the current running Spotify song.<br>
+A module to display the currently playing Spotify song.<br>
 
 It will show the track cover, track title and artist with progress on top of the image.<br>
 You can hover with your mouse over the image to extend the module with a detailed progress bar
