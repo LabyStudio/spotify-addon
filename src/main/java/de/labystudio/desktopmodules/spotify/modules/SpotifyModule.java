@@ -43,11 +43,11 @@ public class SpotifyModule extends Module<SpotifyAddon> {
     public void loadTextures(TextureLoader textureLoader) {
         String spotifyPath = "textures/spotify/";
 
-        this.textureSpotify = textureLoader.loadTexture(spotifyPath + "spotify.png");
-        this.textureControlPlay = textureLoader.loadTexture(spotifyPath + "control_play.png");
-        this.textureControlPause = textureLoader.loadTexture(spotifyPath + "control_pause.png");
-        this.textureControlNext = textureLoader.loadTexture(spotifyPath + "control_next.png");
-        this.textureControlPrevious = textureLoader.loadTexture(spotifyPath + "control_previous.png");
+        this.textureSpotify = textureLoader.load(spotifyPath + "spotify.png");
+        this.textureControlPlay = textureLoader.load(spotifyPath + "control_play.png");
+        this.textureControlPause = textureLoader.load(spotifyPath + "control_pause.png");
+        this.textureControlNext = textureLoader.load(spotifyPath + "control_next.png");
+        this.textureControlPrevious = textureLoader.load(spotifyPath + "control_previous.png");
     }
 
     @Override

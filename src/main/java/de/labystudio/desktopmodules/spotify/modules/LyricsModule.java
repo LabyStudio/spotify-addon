@@ -173,7 +173,7 @@ public class LyricsModule extends Module<SpotifyAddon> {
 
     @Override
     public void loadTextures(TextureLoader textureLoader) {
-        this.textureSpotify = textureLoader.loadTexture("textures/spotify/lyrics/spotify.png");
+        this.textureSpotify = textureLoader.load("textures/spotify/lyrics/spotify.png");
     }
 
     @Override
