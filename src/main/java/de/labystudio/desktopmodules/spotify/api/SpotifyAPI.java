@@ -46,7 +46,7 @@ public class SpotifyAPI implements PacketHandler {
     /**
      * The last error type (Is null if there is no error)
      */
-    private ErrorType lastErrorType;
+    private ErrorType lastErrorType = ErrorType.SPOTIFY_API_NOT_OPEN;
 
     /**
      * The current running track
@@ -122,6 +122,9 @@ public class SpotifyAPI implements PacketHandler {
             // Connect if not connected yet
             if (!this.spotifyConnector.isConnected()) {
                 this.spotifyConnector.prepareAndConnect();
+
+                // Update error type
+                this.lastErrorType = this.spotifyConnector.isConnected() ? null : ErrorType.SPOTIFY_API_NOT_OPEN;
             }
         });
     }

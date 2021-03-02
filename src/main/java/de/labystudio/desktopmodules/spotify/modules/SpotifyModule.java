@@ -76,7 +76,7 @@ public class SpotifyModule extends Module<SpotifyAddon> {
             // Set error message if present
             ErrorType errorType = api.getLastErrorType();
             if (errorType != null) {
-                subTitle = errorType.getMessage();
+                subTitle = SpotifyAddon.IS_WINDOWS ? errorType.getMessage() : "Your OS is not supported";
             }
 
             // Draw text

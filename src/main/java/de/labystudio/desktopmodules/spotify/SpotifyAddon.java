@@ -1,6 +1,7 @@
 package de.labystudio.desktopmodules.spotify;
 
 import de.labystudio.desktopmodules.core.addon.Addon;
+import de.labystudio.desktopmodules.core.os.OperatingSystem;
 import de.labystudio.desktopmodules.spotify.api.SpotifyAPI;
 import de.labystudio.desktopmodules.spotify.api.lyrics.LyricsProvider;
 import de.labystudio.desktopmodules.spotify.api.lyrics.reader.Lyrics;
@@ -13,6 +14,8 @@ import de.labystudio.desktopmodules.spotify.modules.SpotifyModule;
  * @author LabyStudio
  */
 public class SpotifyAddon extends Addon {
+
+    public static boolean IS_WINDOWS = OperatingSystem.getPlatform() == OperatingSystem.WINDOWS;
 
     private LyricsProvider lyricsProvider;
     private SpotifyAPI spotifyAPI;
@@ -34,7 +37,9 @@ public class SpotifyAddon extends Addon {
 
     @Override
     public void onEnable() {
-        this.spotifyAPI.connect();
+        if (IS_WINDOWS) {
+            this.spotifyAPI.connect();
+        }
     }
 
     @Override
