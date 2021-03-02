@@ -5,7 +5,6 @@ package de.labystudio.desktopmodules.spotify.api.protocol;
  * @author LabyStudio
  */
 public enum ErrorType {
-    SPOTIFY_API_NOT_OPEN(-1, "Not connected to SpotifyAPI"),
     SPOTIFY_NOT_OPEN(1, "Spotify is not open"),
     SPOTIFY_PROCESS_INVALID(2, "Invalid Spotify process"),
     NO_CHROME_MODULE(3, "An internal module is missing"),

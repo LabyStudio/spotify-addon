@@ -12,7 +12,7 @@ import de.labystudio.desktopmodules.spotify.api.SpotifyAPI;
 import de.labystudio.desktopmodules.spotify.api.Track;
 import de.labystudio.desktopmodules.spotify.api.protocol.ErrorType;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 /**
@@ -76,7 +76,10 @@ public class SpotifyModule extends Module<SpotifyAddon> {
             // Set error message if present
             ErrorType errorType = api.getLastErrorType();
             if (errorType != null) {
-                subTitle = SpotifyAddon.IS_WINDOWS ? errorType.getMessage() : "Your OS is not supported";
+                subTitle = errorType.getMessage();
+            }
+            if (!api.isConnected()) {
+                subTitle = SpotifyAddon.IS_WINDOWS ? "Connecting to API...": "Your OS is not supported";
             }
 
             // Draw text
