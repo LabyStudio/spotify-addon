@@ -106,7 +106,7 @@ public class WinSpotifyConnector {
 
         // Run repeating task
         if (this.task == null || this.task.isDone() || this.task.isCancelled()) {
-            this.task = this.executor.scheduleAtFixedRate(this::onUpdate, 10, UPDATE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+            this.task = this.executor.scheduleAtFixedRate(this::onUpdate, 0, UPDATE_INTERVAL_SECONDS, TimeUnit.SECONDS);
         }
     }
 
