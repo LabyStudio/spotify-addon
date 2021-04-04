@@ -149,7 +149,7 @@ public class LyricsModule extends Module<SpotifyAddon> {
             // Draw the next voice line in the stack
             if (voiceLine != null) {
                 context.drawString(voiceLine.getContent(), this.rightBound ? this.width - this.height - 5 : this.height + 5, (float) y,
-                        StringAlignment.from(this.rightBound), StringEffect.NONE, Color.WHITE, FONT);
+                        StringAlignment.from(this.rightBound), StringEffect.SHADOW, Color.WHITE, FONT);
             }
 
             y += 12;
