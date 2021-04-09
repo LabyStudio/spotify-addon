@@ -9,6 +9,7 @@ import de.labystudio.desktopmodules.spotify.api.rest.model.track.OpenTrack;
 import javax.imageio.ImageIO;
 import javax.net.ssl.HttpsURLConnection;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.concurrent.Executor;
@@ -32,28 +33,36 @@ public class OpenSpotifyAPI {
     private AccessTokenResponse accessTokenResponse;
 
     public OpenSpotifyAPI() {
-        generateAccessToken();
+        generateAccessTokenAsync(accessTokenResponse -> this.accessTokenResponse = accessTokenResponse);
+    }
+
+    /**
+     * Generate an access token asynchronously for the open spotify api
+     */
+    private void generateAccessTokenAsync(Consumer<AccessTokenResponse> callback) {
+        this.executor.execute(() -> {
+            try {
+                // Generate access token
+                callback.accept(generateAccessToken());
+            } catch (Exception error) {
+                error.printStackTrace();
+            }
+        });
     }
 
     /**
      * Generate an access token for the open spotify api
      */
-    private void generateAccessToken() {
-        this.executor.execute(() -> {
-            try {
-                // Open connection
-                HttpsURLConnection connection = (HttpsURLConnection) new URL(URL_API_GEN_ACCESS_TOKEN).openConnection();
-                connection.addRequestProperty("User-Agent", USER_AGENT);
-                connection.addRequestProperty("referer", "https://open.spotify.com/");
-                connection.addRequestProperty("app-platform", "WebPlayer");
+    private AccessTokenResponse generateAccessToken() throws IOException {
+        // Open connection
+        HttpsURLConnection connection = (HttpsURLConnection) new URL(URL_API_GEN_ACCESS_TOKEN).openConnection();
+        connection.addRequestProperty("User-Agent", USER_AGENT);
+        connection.addRequestProperty("referer", "https://open.spotify.com/");
+        connection.addRequestProperty("app-platform", "WebPlayer");
 
-                // Read response
-                JsonReader reader = new JsonReader(new InputStreamReader(connection.getInputStream()));
-                this.accessTokenResponse = new Gson().fromJson(reader, AccessTokenResponse.class);
-            } catch (Exception error) {
-                error.printStackTrace();
-            }
-        });
+        // Read response
+        JsonReader reader = new JsonReader(new InputStreamReader(connection.getInputStream()));
+        return new Gson().fromJson(reader, AccessTokenResponse.class);
     }
 
     /**
@@ -100,7 +109,7 @@ public class OpenSpotifyAPI {
             // Prevent infinite loop
             if (canGenerateNewAccessToken) {
                 // Generate new access token
-                generateAccessToken();
+                this.accessTokenResponse = generateAccessToken();
 
                 // Try again
                 return requestImage(track, false);
