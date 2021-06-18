@@ -15,18 +15,15 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.LabyStudio:desktopmodules:2.5.1'
+    implementation 'com.github.LabyStudio:desktopmodules:2.5.2'
+    implementation 'com.github.LabyStudio:desktopmodules:2.5.2:sources'
     //implementation project(':desktopmodules-core')
-}
 
-jar {
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+    implementation 'com.google.code.gson:gson:2.8.7'
 }
 
 allprojects {
     repositories {
-        maven { url 'https://jitpack.io' }
+        maven { url 'https://labystudio.de/maven/' }
     }
 }
