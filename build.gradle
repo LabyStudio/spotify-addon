@@ -15,11 +15,9 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.LabyStudio:desktopmodules:2.5.3'
+    implementation 'com.github.LabyStudio:desktopmodules:2.5.3:all'
     implementation 'com.github.LabyStudio:desktopmodules:2.5.3:sources'
     //implementation project(':desktopmodules-core')
-
-    implementation 'com.google.code.gson:gson:2.8.7'
 }
 
 allprojects {
