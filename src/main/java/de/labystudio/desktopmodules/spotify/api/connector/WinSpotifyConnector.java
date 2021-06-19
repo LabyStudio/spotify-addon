@@ -93,6 +93,13 @@ public class WinSpotifyConnector {
         // Execute api executable
         this.process = runtime.exec(arguments);
 
+        // Wait for process to start
+        try {
+            this.process.waitFor(3, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         // Connect to api process
         this.socket = new Socket();
         this.socket.connect(ADDRESS_SOCKET_API, SOCKET_TIMEOUT_MS);
