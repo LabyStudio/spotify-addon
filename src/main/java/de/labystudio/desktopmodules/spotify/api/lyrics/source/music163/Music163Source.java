@@ -17,7 +17,7 @@ import de.labystudio.desktopmodules.spotify.api.lyrics.source.music163.model.Son
 public class Music163Source extends LyricsSource {
 
     private static final String API_ROOT = "http://music.163.com/api/";
-    private static final String API_SEARCH = API_ROOT + "search/pc?offset=0&total=true&limit=100&type=1&s=%s";
+    private static final String API_SEARCH = API_ROOT + "search/get?offset=0&total=true&limit=100&type=1&s=%s";
     private static final String API_LYRIC = API_ROOT + "song/lyric?id=%s&lv=1&kv=1&tv=-1";
 
     @Override
@@ -26,14 +26,16 @@ public class Music163Source extends LyricsSource {
         QueryResponse queryResponse = GSON.fromJson(json, QueryResponse.class);
 
         // Iterate all query results
-        for (Song song : queryResponse.result.songs) {
+        if (queryResponse.result != null) {
+            for (Song song : queryResponse.result.songs) {
 
-            // Has matching track name
-            if (song.name.equalsIgnoreCase(track.getName())) {
+                // Has matching track name
+                if (song.name.equalsIgnoreCase(track.getName())) {
 
-                // Has matching artist name
-                if (song.artists != null && song.artists.length != 0 && song.artists[0].name.equalsIgnoreCase(track.getArtist())) {
-                    return loadLyrics(song);
+                    // Has matching artist name
+                    if (song.artists != null && song.artists.length != 0 && song.artists[0].name.equalsIgnoreCase(track.getArtist())) {
+                        return loadLyrics(song);
+                    }
                 }
             }
         }
