@@ -1,5 +1,5 @@
 
-package de.labystudio.desktopmodules.spotify.api.rest.model.track;
+package de.labystudio.desktopmodules.spotify.api.spotify.model.track;
 
 import com.google.gson.annotations.SerializedName;
 

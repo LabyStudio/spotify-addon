@@ -5,6 +5,8 @@ It will show the track cover, track title and artist with progress on top of the
 You can hover with your mouse over the image to extend the module with a detailed progress bar
 and control buttons.
 
+This addon uses the [java-spotify-api](https://github.com/LabyStudio/java-spotify-api) to access the Spotify data.
+
 ### Supported features:
 - Track title & artist
 - Track progress & length

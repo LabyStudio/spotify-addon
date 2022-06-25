@@ -1,5 +1,6 @@
 package de.labystudio.desktopmodules.spotify.modules;
 
+import com.google.gson.JsonObject;
 import de.labystudio.desktopmodules.core.loader.TextureLoader;
 import de.labystudio.desktopmodules.core.module.Module;
 import de.labystudio.desktopmodules.core.renderer.IRenderContext;
@@ -8,9 +9,10 @@ import de.labystudio.desktopmodules.core.renderer.font.FontStyle;
 import de.labystudio.desktopmodules.core.renderer.font.StringAlignment;
 import de.labystudio.desktopmodules.core.renderer.font.StringEffect;
 import de.labystudio.desktopmodules.spotify.SpotifyAddon;
-import de.labystudio.desktopmodules.spotify.api.SpotifyAPI;
-import de.labystudio.desktopmodules.spotify.api.Track;
-import de.labystudio.desktopmodules.spotify.api.protocol.ErrorType;
+import de.labystudio.desktopmodules.spotify.api.spotify.OpenSpotifyAPI;
+import de.labystudio.spotifyapi.SpotifyAPI;
+import de.labystudio.spotifyapi.SpotifyListenerAdapter;
+import de.labystudio.spotifyapi.model.Track;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -29,6 +31,9 @@ public class SpotifyModule extends Module<SpotifyAddon> {
     private static final Color COLOR_PROGRESS_BACKGROUND = new Color(20, 20, 20, 155);
     private static final Color COLOR_PROGRESS = new Color(30, 215, 96, 255);
 
+    private final OpenSpotifyAPI openSpotifyAPI = new OpenSpotifyAPI();
+    private BufferedImage coverImage;
+
     private BufferedImage textureSpotify;
     private BufferedImage textureControlPlay;
     private BufferedImage textureControlPause;
@@ -37,6 +42,19 @@ public class SpotifyModule extends Module<SpotifyAddon> {
 
     public SpotifyModule() {
         super(300, 80);
+    }
+
+    @Override
+    public void onInitialize(SpotifyAddon addon, JsonObject config) {
+        super.onInitialize(addon, config);
+
+        addon.getSpotifyAPI().registerListener(new SpotifyListenerAdapter() {
+            @Override
+            public void onTrackChanged(Track track) {
+                coverImage = null;
+                openSpotifyAPI.requestImageAsync(track, image -> coverImage = image);
+            }
+        });
     }
 
     @Override
@@ -51,13 +69,13 @@ public class SpotifyModule extends Module<SpotifyAddon> {
     }
 
     @Override
-    public void onRender(IRenderContext context, int width, int height) {
+    public void onRender(IRenderContext context, int width, int height, int mouseX, int mouseY) {
         SpotifyAPI api = this.addon.getSpotifyAPI();
-        Track track = api.getTrack();
+        Track track = api.isConnected() ? api.getTrack() : null;
         boolean extendedModule = isMouseOver();
 
         // Draw spotify image
-        BufferedImage trackCover = track == null || track.getCover() == null ? this.textureSpotify : track.getCover();
+        BufferedImage trackCover = track == null || this.coverImage == null ? this.textureSpotify : this.coverImage;
         context.drawImage(trackCover, this.rightBound ? width - height : 0, 0, height, height);
 
         // Draw background
@@ -74,12 +92,16 @@ public class SpotifyModule extends Module<SpotifyAddon> {
             String subTitle = track == null ? "No song playing" : track.getArtist().length() > 34 ? track.getArtist().substring(0, 34) : track.getArtist();
 
             // Set error message if present
-            ErrorType errorType = api.getLastErrorType();
-            if (errorType != null) {
-                subTitle = errorType.getMessage();
-            }
-            if (!api.isConnected()) {
-                subTitle = SpotifyAddon.IS_WINDOWS ? "Connecting to API...": "Your OS is not supported";
+            if (api.isInitialized()) {
+                if (api.isConnected()) {
+                    if (this.addon.getLastError() != null) {
+                        subTitle = this.addon.getLastError();
+                    }
+                } else {
+                    subTitle = "Connecting to Spotify...";
+                }
+            } else {
+                subTitle = "Initializing...";
             }
 
             // Draw text
@@ -114,7 +136,7 @@ public class SpotifyModule extends Module<SpotifyAddon> {
             }
 
             // Draw progress bar
-            if (track != null) {
+            if (track != null && api.hasPosition()) {
                 double paddingX = context.getStringWidth("00:00", FONT_TIME) + 5;
 
                 double x = this.rightBound ? paddingX : height + paddingX;
@@ -127,23 +149,23 @@ public class SpotifyModule extends Module<SpotifyAddon> {
                 context.drawRectWH(x, y - progressHeight, progressWidth, progressHeight, COLOR_PROGRESS_BACKGROUND);
 
                 // Green bar
-                context.drawRectWH(x, y - progressHeight, (progressWidth / (double) track.getLength() * api.getProgress()), progressHeight, COLOR_PROGRESS);
+                context.drawRectWH(x, y - progressHeight, (progressWidth / (double) track.getLength() * api.getPosition()), progressHeight, COLOR_PROGRESS);
 
                 // Elapsed time
-                String elapsedTime = formatTime(api.getProgress());
+                String elapsedTime = formatTime(api.getPosition());
                 context.drawString(elapsedTime, x - 3, y, StringAlignment.RIGHT, StringEffect.NONE, Color.WHITE, FONT_TIME);
 
                 // Remaining time
-                String remainingTime = formatTime(track.getLength() - api.getProgress());
+                String remainingTime = formatTime(track.getLength() - api.getPosition());
                 context.drawString(remainingTime, x + progressWidth + 3, y, StringAlignment.LEFT, StringEffect.NONE, Color.WHITE, FONT_TIME);
             }
         } else {
             double x = this.rightBound ? width - height : 0;
 
             // Draw progress on cover
-            if (track != null) {
+            if (track != null && api.hasPosition()) {
                 context.drawRectWH(x, height - 3, height, 3, COLOR_PROGRESS_BACKGROUND);
-                context.drawRectWH(x, height - 3, (this.height / (double) track.getLength() * api.getProgress()), 3, COLOR_PROGRESS);
+                context.drawRectWH(x, height - 3, (this.height / (double) track.getLength() * api.getPosition()), 3, COLOR_PROGRESS);
             }
         }
     }
@@ -158,19 +180,19 @@ public class SpotifyModule extends Module<SpotifyAddon> {
         if (y > controlsY && y < controlsY + 24) {
             // Previous
             if (x > controlsX - 11 && x < controlsX) {
-                api.sendMediaCommand(SpotifyAPI.EnumMediaCommand.PREVIOUS);
+                // api.sendMediaCommand(SpotifyAPI.EnumMediaCommand.PREVIOUS); // TODO implement
                 return;
             }
 
             // Play/pause
             if (x > controlsX && x < controlsX + 17) {
-                api.sendMediaCommand(SpotifyAPI.EnumMediaCommand.PLAY_PAUSE);
+                // api.sendMediaCommand(SpotifyAPI.EnumMediaCommand.PLAY_PAUSE); // TODO implement
                 return;
             }
 
             // Next
             if (x > controlsX + 28 && x < controlsX + 28 + 11) {
-                api.sendMediaCommand(SpotifyAPI.EnumMediaCommand.NEXT);
+                // api.sendMediaCommand(SpotifyAPI.EnumMediaCommand.NEXT); // TODO implement
                 return;
             }
         }

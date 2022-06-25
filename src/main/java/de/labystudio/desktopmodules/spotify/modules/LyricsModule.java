@@ -10,12 +10,14 @@ import de.labystudio.desktopmodules.core.renderer.font.FontStyle;
 import de.labystudio.desktopmodules.core.renderer.font.StringAlignment;
 import de.labystudio.desktopmodules.core.renderer.font.StringEffect;
 import de.labystudio.desktopmodules.spotify.SpotifyAddon;
-import de.labystudio.desktopmodules.spotify.api.SpotifyAPI;
-import de.labystudio.desktopmodules.spotify.api.Track;
+import de.labystudio.desktopmodules.spotify.api.lyrics.LyricsProvider;
 import de.labystudio.desktopmodules.spotify.api.lyrics.reader.Lyrics;
 import de.labystudio.desktopmodules.spotify.api.lyrics.reader.VoiceLine;
+import de.labystudio.spotifyapi.SpotifyAPI;
+import de.labystudio.spotifyapi.SpotifyListenerAdapter;
+import de.labystudio.spotifyapi.model.Track;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 /**
@@ -32,6 +34,9 @@ public class LyricsModule extends Module<SpotifyAddon> {
      * then it is possible to shift the voice lines with this variable
      */
     private static final int VOICE_LINE_SHIFT = -2;
+
+    private final LyricsProvider lyricsProvider = new LyricsProvider();
+    private Lyrics lyrics;
 
     private BufferedImage textureSpotify;
 
@@ -50,8 +55,16 @@ public class LyricsModule extends Module<SpotifyAddon> {
     public void onInitialize(SpotifyAddon addon, JsonObject config) {
         super.onInitialize(addon, config);
 
-        // Reset custom offset shit
-        addon.getSpotifyAPI().addTrackChangeListener(track -> this.customOffsetShift = 0);
+        // Reset custom offset shift
+        addon.getSpotifyAPI().registerListener(new SpotifyListenerAdapter() {
+            @Override
+            public void onTrackChanged(Track track) {
+                customOffsetShift = 0;
+                lyricsProvider.requestAsync(track, newLyrics -> {
+                    lyrics = newLyrics;
+                });
+            }
+        });
     }
 
     @Override
@@ -63,11 +76,11 @@ public class LyricsModule extends Module<SpotifyAddon> {
 
     @Override
     public void onTick() {
-        Lyrics lyrics = this.addon.getLyrics();
+        SpotifyAPI api = this.addon.getSpotifyAPI();
 
         // Only if the lyrics has voice lines
-        if (lyrics != null && lyrics.hasLines()) {
-            long progress = this.addon.getSpotifyAPI().getProgress() + this.customOffsetShift;
+        if (this.lyrics != null && this.lyrics.hasLines() && api.hasPosition() && api.isConnected()) {
+            long progress = api.getPosition() + this.customOffsetShift;
 
             // Indicator if the next voice line should be displayed
             boolean voiceLineChanged = false;
@@ -75,7 +88,7 @@ public class LyricsModule extends Module<SpotifyAddon> {
             // Iterate the voice line stack and check if the offset changed
             for (int i = 0; i < this.voiceLineStack.length; i++) {
                 // Get the voice line at given offset and shift
-                VoiceLine voiceLine = lyrics.getVoiceLineAt(progress, VOICE_LINE_SHIFT + i);
+                VoiceLine voiceLine = this.lyrics.getVoiceLineAt(progress, VOICE_LINE_SHIFT + i);
 
                 // We just have to compare the first one because it is always the same result for each line
                 if (i == 0) {
@@ -103,30 +116,45 @@ public class LyricsModule extends Module<SpotifyAddon> {
     }
 
     @Override
-    public void onRender(IRenderContext context, int width, int height) {
+    public void onRender(IRenderContext context, int width, int height, int mouseX, int mouseY) {
         context.drawImage(this.textureSpotify, this.rightBound ? this.width - this.height : 0, 0, height, height);
 
-        Lyrics lyrics = this.addon.getLyrics();
         SpotifyAPI api = this.addon.getSpotifyAPI();
 
         // No voice lines in the stack
-        if (lyrics == null || !lyrics.hasLines() || this.voiceLineStack[0] == null) {
-            Track track = api.getTrack();
+        if (this.lyrics == null
+                || !this.lyrics.hasLines()
+                || this.voiceLineStack[0] == null
+                || !api.hasPosition()
+                || !api.isConnected()) {
+
+            Track track = api.isConnected() ? api.getTrack() : null;
 
             // Draw track name
-            context.drawString(track == null ? "Spotify" : track.getName(),
+            context.drawString(
+                    track == null ? "Spotify" : track.getName(),
                     this.rightBound ? this.width - this.height - 5 : this.height + 5, (float) 10,
-                    StringAlignment.from(this.rightBound), StringEffect.SHADOW, Color.WHITE, FONT);
+                    StringAlignment.from(this.rightBound),
+                    StringEffect.SHADOW,
+                    Color.WHITE,
+                    FONT
+            );
 
             // Draw artist name
-            context.drawString(track == null ? "No song playing" : track.getArtist(),
-                    this.rightBound ? this.width - this.height - 5 : this.height + 5, (float) 22,
-                    StringAlignment.from(this.rightBound), StringEffect.SHADOW, Color.WHITE, FONT);
+            context.drawString(
+                    track == null ? "No song playing" : track.getArtist(),
+                    this.rightBound ? this.width - this.height - 5 : this.height + 5,
+                    (float) 22,
+                    StringAlignment.from(this.rightBound),
+                    StringEffect.SHADOW,
+                    Color.WHITE,
+                    FONT
+            );
             return;
         }
 
         // Get offset of the current playing track
-        long progress = api.getProgress() + this.customOffsetShift;
+        long progress = api.getPosition() + this.customOffsetShift;
 
         // Get the progress of the current playing animation
         double animationProgress = (progress - this.lastVoiceLineChanged) / 50d;
@@ -148,8 +176,15 @@ public class LyricsModule extends Module<SpotifyAddon> {
 
             // Draw the next voice line in the stack
             if (voiceLine != null) {
-                context.drawString(voiceLine.getContent(), this.rightBound ? this.width - this.height - 5 : this.height + 5, (float) y,
-                        StringAlignment.from(this.rightBound), StringEffect.SHADOW, Color.WHITE, FONT);
+                context.drawString(
+                        voiceLine.getContent(),
+                        this.rightBound ? this.width - this.height - 5 : this.height + 5,
+                        (float) y,
+                        StringAlignment.from(this.rightBound),
+                        StringEffect.SHADOW,
+                        Color.WHITE,
+                        FONT
+                );
             }
 
             y += 12;

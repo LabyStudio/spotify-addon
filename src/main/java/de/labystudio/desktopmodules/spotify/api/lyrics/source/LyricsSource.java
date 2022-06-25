@@ -1,8 +1,8 @@
 package de.labystudio.desktopmodules.spotify.api.lyrics.source;
 
 import com.google.gson.Gson;
-import de.labystudio.desktopmodules.spotify.api.Track;
 import de.labystudio.desktopmodules.spotify.api.lyrics.reader.Lyrics;
+import de.labystudio.spotifyapi.model.Track;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;

@@ -1,12 +1,12 @@
 package de.labystudio.desktopmodules.spotify.api.lyrics.source.music163;
 
-import de.labystudio.desktopmodules.spotify.api.Track;
 import de.labystudio.desktopmodules.spotify.api.lyrics.reader.Lyrics;
 import de.labystudio.desktopmodules.spotify.api.lyrics.reader.LyricsReader;
 import de.labystudio.desktopmodules.spotify.api.lyrics.source.LyricsSource;
 import de.labystudio.desktopmodules.spotify.api.lyrics.source.music163.model.LyricResponse;
 import de.labystudio.desktopmodules.spotify.api.lyrics.source.music163.model.QueryResponse;
 import de.labystudio.desktopmodules.spotify.api.lyrics.source.music163.model.Song;
+import de.labystudio.spotifyapi.model.Track;
 
 /**
  * Music163 lyrics database

@@ -1,12 +1,11 @@
 package de.labystudio.desktopmodules.spotify;
 
 import de.labystudio.desktopmodules.core.addon.Addon;
-import de.labystudio.desktopmodules.core.os.OperatingSystem;
-import de.labystudio.desktopmodules.spotify.api.SpotifyAPI;
-import de.labystudio.desktopmodules.spotify.api.lyrics.LyricsProvider;
-import de.labystudio.desktopmodules.spotify.api.lyrics.reader.Lyrics;
 import de.labystudio.desktopmodules.spotify.modules.LyricsModule;
 import de.labystudio.desktopmodules.spotify.modules.SpotifyModule;
+import de.labystudio.spotifyapi.SpotifyAPI;
+import de.labystudio.spotifyapi.SpotifyAPIFactory;
+import de.labystudio.spotifyapi.SpotifyListenerAdapter;
 
 /**
  * Spotify addon
@@ -15,43 +14,53 @@ import de.labystudio.desktopmodules.spotify.modules.SpotifyModule;
  */
 public class SpotifyAddon extends Addon {
 
-    public static boolean IS_WINDOWS = OperatingSystem.getPlatform() == OperatingSystem.WINDOWS;
-
-    private LyricsProvider lyricsProvider;
     private SpotifyAPI spotifyAPI;
-
-    private Lyrics lyrics;
+    private String lastError = null;
+    private boolean initialized = false;
 
     @Override
     public void onInitialize() throws Exception {
-        this.lyricsProvider = new LyricsProvider();
-        this.spotifyAPI = new SpotifyAPI(getConfigDirectory());
+        this.spotifyAPI = SpotifyAPIFactory.create();
+        this.spotifyAPI.registerListener(new SpotifyListenerAdapter() {
+            @Override
+            public void onConnect() {
+                lastError = null;
+            }
 
-        // Register track change listener
-        this.spotifyAPI.addTrackChangeListener(track ->
-                this.lyricsProvider.requestAsync(track, lyrics -> this.lyrics = lyrics));
+            @Override
+            public void onDisconnect(Exception exception) {
+                lastError = exception.getMessage();
+            }
+        });
 
         registerModule(SpotifyModule.class);
         registerModule(LyricsModule.class);
+
+        // Initialize api after modules are registered
+        if (this.hasActiveModules()) {
+            this.spotifyAPI.initialize();
+        }
+        this.initialized = true;
     }
 
     @Override
     public void onEnable() {
-        if (IS_WINDOWS) {
-            this.spotifyAPI.connect();
+        // Don't initialize api before modules are registered
+        if (this.initialized) {
+            this.spotifyAPI.initialize();
         }
     }
 
     @Override
     public void onDisable() {
-        this.spotifyAPI.disconnect();
+        this.spotifyAPI.stop();
     }
 
     public SpotifyAPI getSpotifyAPI() {
-        return spotifyAPI;
+        return this.spotifyAPI;
     }
 
-    public Lyrics getLyrics() {
-        return lyrics;
+    public String getLastError() {
+        return this.lastError;
     }
 }

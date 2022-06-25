@@ -1,10 +1,10 @@
-package de.labystudio.desktopmodules.spotify.api.rest;
+package de.labystudio.desktopmodules.spotify.api.spotify;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import de.labystudio.desktopmodules.spotify.api.Track;
-import de.labystudio.desktopmodules.spotify.api.rest.model.AccessTokenResponse;
-import de.labystudio.desktopmodules.spotify.api.rest.model.track.OpenTrack;
+import de.labystudio.desktopmodules.spotify.api.spotify.model.AccessTokenResponse;
+import de.labystudio.desktopmodules.spotify.api.spotify.model.track.OpenTrack;
+import de.labystudio.spotifyapi.model.Track;
 
 import javax.imageio.ImageIO;
 import javax.net.ssl.HttpsURLConnection;

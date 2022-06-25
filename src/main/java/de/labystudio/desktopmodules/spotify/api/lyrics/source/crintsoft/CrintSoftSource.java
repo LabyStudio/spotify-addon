@@ -1,10 +1,10 @@
 package de.labystudio.desktopmodules.spotify.api.lyrics.source.crintsoft;
 
 
-import de.labystudio.desktopmodules.spotify.api.Track;
 import de.labystudio.desktopmodules.spotify.api.lyrics.reader.Lyrics;
 import de.labystudio.desktopmodules.spotify.api.lyrics.reader.LyricsReader;
 import de.labystudio.desktopmodules.spotify.api.lyrics.source.LyricsSource;
+import de.labystudio.spotifyapi.model.Track;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
