@@ -9,10 +9,11 @@ import de.labystudio.desktopmodules.core.renderer.font.FontStyle;
 import de.labystudio.desktopmodules.core.renderer.font.StringAlignment;
 import de.labystudio.desktopmodules.core.renderer.font.StringEffect;
 import de.labystudio.desktopmodules.spotify.SpotifyAddon;
-import de.labystudio.desktopmodules.spotify.api.spotify.OpenSpotifyAPI;
 import de.labystudio.spotifyapi.SpotifyAPI;
 import de.labystudio.spotifyapi.SpotifyListenerAdapter;
+import de.labystudio.spotifyapi.model.MediaKey;
 import de.labystudio.spotifyapi.model.Track;
+import de.labystudio.spotifyapi.open.OpenSpotifyAPI;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -180,19 +181,19 @@ public class SpotifyModule extends Module<SpotifyAddon> {
         if (y > controlsY && y < controlsY + 24) {
             // Previous
             if (x > controlsX - 11 && x < controlsX) {
-                // api.sendMediaCommand(SpotifyAPI.EnumMediaCommand.PREVIOUS); // TODO implement
+                api.pressMediaKey(MediaKey.PREV);
                 return;
             }
 
             // Play/pause
             if (x > controlsX && x < controlsX + 17) {
-                // api.sendMediaCommand(SpotifyAPI.EnumMediaCommand.PLAY_PAUSE); // TODO implement
+                api.pressMediaKey(MediaKey.PLAY_PAUSE);
                 return;
             }
 
             // Next
             if (x > controlsX + 28 && x < controlsX + 28 + 11) {
-                // api.sendMediaCommand(SpotifyAPI.EnumMediaCommand.NEXT); // TODO implement
+                api.pressMediaKey(MediaKey.NEXT);
                 return;
             }
         }
