@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.github.LabyStudio'
-version '1.4.1'
+version '1.5.0'
 
 compileJava {
     sourceCompatibility = '1.8'
@@ -20,8 +20,8 @@ build {
 }
 
 dependencies {
-    implementation 'com.github.LabyStudio:desktopmodules:2.5.3:all'
-    implementation 'com.github.LabyStudio:java-spotify-api:1.0.9:all'
+    implementation 'com.github.LabyStudio:desktopmodules:2.5.5:all'
+    implementation 'com.github.LabyStudio:java-spotify-api:1.1.0:all'
 
     //implementation project(':desktopmodules-core')
 }

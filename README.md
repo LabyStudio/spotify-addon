@@ -14,7 +14,7 @@ This addon uses the [java-spotify-api](https://github.com/LabyStudio/java-spotif
 - Track cover
 - Previous song, play/pause & next song buttons
 
-*Currently only available for Windows*
+*Supports Windows and macOS*
 
 ![Preview](.github/assets/preview.png)
 
