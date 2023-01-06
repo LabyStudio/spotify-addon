@@ -38,7 +38,7 @@ public class SpotifyAddon extends Addon {
 
         // Initialize api after modules are registered
         if (this.hasActiveModules()) {
-            this.spotifyAPI.initialize();
+            this.spotifyAPI.initializeAsync();
         }
         this.initialized = true;
     }
@@ -47,7 +47,7 @@ public class SpotifyAddon extends Addon {
     public void onEnable() {
         // Don't initialize api before modules are registered
         if (this.initialized) {
-            this.spotifyAPI.initialize();
+            this.spotifyAPI.initializeAsync();
         }
     }
 
