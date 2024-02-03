@@ -4,6 +4,7 @@ import de.labystudio.desktopmodules.spotify.api.lyrics.reader.Lyrics;
 import de.labystudio.desktopmodules.spotify.api.lyrics.source.LyricsSource;
 import de.labystudio.desktopmodules.spotify.api.lyrics.source.crintsoft.CrintSoftSource;
 import de.labystudio.desktopmodules.spotify.api.lyrics.source.music163.Music163Source;
+import de.labystudio.desktopmodules.spotify.api.lyrics.source.lrclib.LrcLib;
 import de.labystudio.spotifyapi.model.Track;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class LyricsProvider {
      * Adds all sources
      */
     public LyricsProvider() {
+        this.sources.add(new LrcLib());
         this.sources.add(new Music163Source());
         this.sources.add(new CrintSoftSource());
     }
