@@ -22,6 +22,7 @@ This addon uses the [java-spotify-api](https://github.com/LabyStudio/java-spotif
 This addon has an additional module that displays the lyrics to the song.
 
 ##### The currently supported lyrics sources are
+- https://lrclib.net/
 - https://crintsoft.com/
 - http://music.163.com/
 
