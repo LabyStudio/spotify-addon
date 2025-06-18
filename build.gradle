@@ -21,7 +21,7 @@ build {
 
 dependencies {
     implementation 'com.github.LabyStudio:desktopmodules:2.5.5:all'
-    implementation 'com.github.LabyStudio:java-spotify-api:1.2.1:all'
+    implementation 'com.github.LabyStudio:java-spotify-api:1.2.3:all'
 
     //implementation project(':desktopmodules-core')
 }
